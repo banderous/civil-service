@@ -24,6 +24,9 @@ properties([
     string(name: 'FUNCTIONAL_TESTS_WORKERS',
       defaultValue: '1',
       description: 'Number of workers running functional tests'),
+    string(name: 'SELECTED_BROWSER',
+      defaultValue: 'microsoft-ie11_win',
+      description: 'Available options: microsoft-ie11_win, microsoft-edge_win_latest, safari-safari_mac_latest, chrome-chrome_win_latest, chrome-chrome_mac_latest, firefox-firefox_win_latest, firefox-firefox_mac_latest'),
   ])
 ])
 
@@ -57,19 +60,10 @@ withNightlyPipeline(type, product, component) {
   env.WAIT_FOR_TIMEOUT_MS = params.WAIT_FOR_TIMEOUT_MS
   env.URL_FOR_SECURITY_SCAN = params.CIVIL_SERVICE_URL
   env.TESTS_FOR_ACCESSIBILITY = true
+  env.SELECTED_BROWSER = params.SELECTED_BROWSER
   loadVaultSecrets(secrets)
 
   //enableMutationTest()
-
-  enableSecurityScan()
-
-  enableFullFunctionalTest(200)
-
-  after('fullFunctionalTest') {
-    sh """ ./gradlew runRpaHandOffTests """
-    archiveArtifacts allowEmptyArchive: true, artifacts: 'output/**/*'
-    env.TESTS_FOR_ACCESSIBILITY = false
-  }
 
   enableCrossBrowserTest()
 
