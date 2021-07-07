@@ -544,7 +544,7 @@
     "addressLineType": {
       "$id": "#/definitions/addressLineType",
       "type": "string",
-      "maxLength": 60,
+      "maxLength": 35,
       "description": ""
     },
     "addressLineOrNullType": {
@@ -553,7 +553,7 @@
         "string",
         "null"
       ],
-      "maxLength": 60,
+      "maxLength": 35,
       "description": ""
     },
     "postCodeType": {
