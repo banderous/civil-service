@@ -65,6 +65,11 @@ bankHolidays:
   api:
     url: https://www.gov.uk
 
+ordnance_survey:
+  api:
+    url: https://api.os.uk/search/places/v1/
+    key: ${ORDNANCE_SURVEY_API_KEY:}
+
 nonworking-days:
   datafile: /data/non-working_days.dat
 
