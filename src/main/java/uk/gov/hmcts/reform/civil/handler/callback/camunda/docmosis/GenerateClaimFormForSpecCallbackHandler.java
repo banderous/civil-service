@@ -12,11 +12,9 @@ import uk.gov.hmcts.reform.civil.callback.CaseEvent;
 import uk.gov.hmcts.reform.civil.model.CaseData;
 import uk.gov.hmcts.reform.civil.model.documents.CaseDocument;
 import uk.gov.hmcts.reform.civil.service.Time;
-import uk.gov.hmcts.reform.civil.service.docmosis.sealedclaim.SealedClaimFormGenerator;
 import uk.gov.hmcts.reform.civil.service.docmosis.sealedclaim.SealedClaimFormGeneratorForSpec;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +22,6 @@ import java.util.Map;
 import static uk.gov.hmcts.reform.civil.callback.CallbackParams.Params.BEARER_TOKEN;
 import static uk.gov.hmcts.reform.civil.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.civil.callback.CaseEvent.GENERATE_CLAIM_FORM_SPEC;
-import static uk.gov.hmcts.reform.civil.enums.YesOrNo.YES;
 import static uk.gov.hmcts.reform.civil.utils.ElementUtils.wrapElements;
 
 @Service
@@ -57,15 +54,6 @@ public class GenerateClaimFormForSpecCallbackHandler extends CallbackHandler {
         CaseData caseData = callbackParams.getCaseData();
         LocalDate issueDate = time.now().toLocalDate();
         CaseData.CaseDataBuilder caseDataBuilder = caseData.toBuilder().issueDate(issueDate);
-           // .claimNotificationDeadline(LocalDateTime.now().plusDays(5))
-         //   .respondent1ResponseDeadline(LocalDateTime.now().plusDays(5))
-          //  .claimDetailsNotificationDate(LocalDateTime.now().plusDays(5))
-           // .respondent1Represented(YES)
-           // .respondent1(caseData.getApplicant1())
-           // .respondent1OrganisationPolicy(caseData.getApplicant1OrganisationPolicy())
-           // .claimDismissedDate(null)
-           // .respondent1OrgRegistered(YES);
-        //caseData.getClaimNotificationDeadline()
 
         CaseDocument sealedClaim = sealedClaimFormGeneratorForSpec.generate(
             caseDataBuilder.build(),
@@ -73,13 +61,8 @@ public class GenerateClaimFormForSpecCallbackHandler extends CallbackHandler {
 
         caseDataBuilder.systemGeneratedCaseDocuments(wrapElements(sealedClaim));
 
-        // caseDataBuilder
-
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataBuilder.build().toMap(objectMapper))
             .build();
-
-        /*return AboutToStartOrSubmitCallbackResponse.builder()
-            .build();*/
     }
 }

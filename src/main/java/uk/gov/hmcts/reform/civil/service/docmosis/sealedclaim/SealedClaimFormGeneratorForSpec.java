@@ -2,7 +2,13 @@ package uk.gov.hmcts.reform.civil.service.docmosis.sealedclaim;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.civil.model.*;
+import uk.gov.hmcts.reform.civil.model.CaseData;
+import uk.gov.hmcts.reform.civil.model.ClaimAmountBreakup;
+import uk.gov.hmcts.reform.civil.model.ClaimAmountBreakupDetails;
+import uk.gov.hmcts.reform.civil.model.LitigationFriend;
+import uk.gov.hmcts.reform.civil.model.SolicitorReferences;
+import uk.gov.hmcts.reform.civil.model.TimelineOfEventDetails;
+import uk.gov.hmcts.reform.civil.model.TimelineOfEvents;
 import uk.gov.hmcts.reform.civil.model.docmosis.DocmosisDocument;
 import uk.gov.hmcts.reform.civil.model.docmosis.common.Party;
 import uk.gov.hmcts.reform.civil.model.docmosis.sealedclaim.SealedClaimFormForSpec;
@@ -11,8 +17,6 @@ import uk.gov.hmcts.reform.civil.model.documents.DocumentType;
 import uk.gov.hmcts.reform.civil.model.documents.PDF;
 import uk.gov.hmcts.reform.civil.model.interestcalc.InterestClaimFromType;
 import uk.gov.hmcts.reform.civil.service.DeadlinesCalculator;
-import uk.gov.hmcts.reform.civil.service.FeesService;
-import uk.gov.hmcts.reform.civil.service.WorkingDayIndicator;
 import uk.gov.hmcts.reform.civil.service.docmosis.DocumentGeneratorService;
 import uk.gov.hmcts.reform.civil.service.docmosis.RepresentativeService;
 import uk.gov.hmcts.reform.civil.service.docmosis.TemplateDataGenerator;
@@ -22,7 +26,6 @@ import uk.gov.hmcts.reform.civil.utils.InterestCalculator;
 import uk.gov.hmcts.reform.civil.utils.MonetaryConversions;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -89,15 +92,14 @@ public class SealedClaimFormGeneratorForSpec implements TemplateDataGenerator<Se
             .howTheInterestWasCalculated(caseData.getInterestClaimOptions() != null
                                              ? caseData.getInterestClaimOptions().getDescription() : null)
             .interestRate(caseData.getSameRateInterestSelection() != null
-                              ? caseData.getSameRateInterestSelection().getDifferentRate() != null ?
-                caseData.getSameRateInterestSelection().getDifferentRate() + "" :
-                "8%" : null)
+                ? caseData.getSameRateInterestSelection().getDifferentRate() != null
+                ? caseData.getSameRateInterestSelection().getDifferentRate() + "" : "8%" : null)
             .interestExplanationText("The claimant reserves the right to claim interest under "
                                          + "Section 69 of the County Courts Act 1984")
             .interestFromDate(caseData.getInterestFromSpecificDate() != null
                                   ? caseData.getInterestFromSpecificDate() : null)
-            .whenAreYouClaimingInterestFrom(caseData.getInterestClaimFrom() != null ? caseData.getInterestClaimFrom().name()
-                .equals(InterestClaimFromType.FROM_CLAIM_SUBMIT_DATE)
+            .whenAreYouClaimingInterestFrom(caseData.getInterestClaimFrom() != null
+                ? caseData.getInterestClaimFrom().name().equals(InterestClaimFromType.FROM_CLAIM_SUBMIT_DATE)
                 ? "From the date the claim was issued" : caseData.getInterestFromSpecificDateDescription() : null)
             .interestEndDate(isAfterFourPM() ? localDateTime.toLocalDate().plusDays(1) : localDateTime.toLocalDate())
             .interestEndDateDescription(caseData.getBreakDownInterestDescription() != null
@@ -107,21 +109,23 @@ public class SealedClaimFormGeneratorForSpec implements TemplateDataGenerator<Se
             .claimAmount(getClaimAmount(caseData))
             .claimFee(MonetaryConversions.penniesToPounds(caseData.getClaimFee().getCalculatedAmountInPence())
                           .toString())
-            // Claim amount + interest + claim fees
             .totalAmountOfClaim(interest != null ? caseData.getTotalClaimAmount()
                 .add(interest)
-                .add(MonetaryConversions.penniesToPounds(caseData.getClaimFee().getCalculatedAmountInPence())).toString()
-                                    : caseData.getTotalClaimAmount()
-                .add(MonetaryConversions.penniesToPounds(caseData.getClaimFee().getCalculatedAmountInPence())).toString())
+                .add(MonetaryConversions.penniesToPounds(caseData.getClaimFee()
+                .getCalculatedAmountInPence())).toString() : caseData.getTotalClaimAmount()
+                .add(MonetaryConversions.penniesToPounds(caseData.getClaimFee()
+                                                             .getCalculatedAmountInPence())).toString())
             .statementOfTruth(caseData.getApplicantSolicitor1ClaimStatementOfTruth())
             .descriptionOfClaim(caseData.getDetailsOfClaim())
-            .applicantRepresentativeOrganisationName(representativeService.getApplicantRepresentative(caseData).getOrganisationName().toString())
+            .applicantRepresentativeOrganisationName(
+                representativeService.getApplicantRepresentative(caseData).getOrganisationName().toString())
             .defendantResponseDeadlineDate(getResponseDedline(caseData))
             .build();
     }
 
     private String getResponseDedline(CaseData caseData) {
-        var notificationDeadline = formatLocalDate(deadlinesCalculator.calculateFirstWorkingDay(caseData.getIssueDate().plusDays(14)), DATE);
+        var notificationDeadline = formatLocalDate(deadlinesCalculator
+            .calculateFirstWorkingDay(caseData.getIssueDate().plusDays(14)), DATE);
         return END_OF_BUSINESS_DAY + notificationDeadline;
     }
 
