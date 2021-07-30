@@ -143,6 +143,7 @@ public class CaseData implements MappableObject {
     private final LocalDateTime respondent1TimeExtensionDate;
     private final LocalDateTime respondent2TimeExtensionDate;
     private final LocalDateTime respondent1AcknowledgeNotificationDate;
+    private final LocalDateTime respondent2AcknowledgeNotificationDate;
     private final LocalDateTime respondent1ResponseDate;
     private final LocalDateTime applicant1ResponseDeadline;
     private final LocalDateTime applicant1ResponseDate;

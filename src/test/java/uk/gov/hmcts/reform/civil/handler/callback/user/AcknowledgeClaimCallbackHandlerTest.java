@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.civil.callback.CallbackParams;
 import uk.gov.hmcts.reform.civil.callback.CallbackType;
 import uk.gov.hmcts.reform.civil.config.ExitSurveyConfiguration;
+import uk.gov.hmcts.reform.civil.enums.YesOrNo;
 import uk.gov.hmcts.reform.civil.handler.callback.BaseCallbackHandlerTest;
 import uk.gov.hmcts.reform.civil.helpers.CaseDetailsConverter;
 import uk.gov.hmcts.reform.civil.model.CaseData;
@@ -179,6 +180,23 @@ class AcknowledgeClaimCallbackHandlerTest extends BaseCallbackHandlerTest {
             assertThat(response.getData())
                 .containsEntry("respondent1ResponseDeadline", newDeadline.format(ISO_DATE_TIME))
                 .containsEntry("respondent1AcknowledgeNotificationDate", acknowledgementDate.format(ISO_DATE_TIME));
+        }
+
+        @Test
+        void shouldSetNewRepsonseDeadlineForRespondent2_whenInvoked() {
+
+            CaseData caseData = CaseDataBuilder.builder().atStateNotificationAcknowledged().build().toBuilder()
+                .respondent1Copy(PartyBuilder.builder().individual().build())
+                .addRespondent2(YesOrNo.YES)
+                .build();
+            CallbackParams params = callbackParamsOf(V_1, caseData, ABOUT_TO_SUBMIT);
+
+            var response = (AboutToStartOrSubmitCallbackResponse) handler.handle(params);
+
+            assertThat(response.getData())
+                .containsEntry("respondent2ResponseDeadline", newDeadline.format(ISO_DATE_TIME))
+                .containsEntry("respondent2AcknowledgeNotificationDate", acknowledgementDate.format(ISO_DATE_TIME));
+
         }
 
         @Test

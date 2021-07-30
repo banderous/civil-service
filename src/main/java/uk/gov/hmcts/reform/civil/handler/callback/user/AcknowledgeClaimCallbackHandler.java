@@ -30,6 +30,7 @@ import static uk.gov.hmcts.reform.civil.callback.CallbackType.MID;
 import static uk.gov.hmcts.reform.civil.callback.CallbackType.SUBMITTED;
 import static uk.gov.hmcts.reform.civil.callback.CallbackVersion.V_1;
 import static uk.gov.hmcts.reform.civil.callback.CaseEvent.ACKNOWLEDGE_CLAIM;
+import static uk.gov.hmcts.reform.civil.enums.YesOrNo.YES;
 import static uk.gov.hmcts.reform.civil.helpers.DateFormatHelper.DATE_TIME_AT;
 import static uk.gov.hmcts.reform.civil.helpers.DateFormatHelper.formatLocalDateTime;
 
@@ -47,6 +48,7 @@ public class AcknowledgeClaimCallbackHandler extends CallbackHandler {
     private final DeadlinesCalculator deadlinesCalculator;
     private final ObjectMapper objectMapper;
     private final Time time;
+    //    TODO: Add new data to caseData
 
     @Override
     protected Map<String, Callback> callbacks() {
@@ -105,21 +107,41 @@ public class AcknowledgeClaimCallbackHandler extends CallbackHandler {
         CaseData caseData = callbackParams.getCaseData();
         LocalDateTime responseDeadline = caseData.getRespondent1ResponseDeadline();
         LocalDateTime newResponseDate = deadlinesCalculator.plus14DaysAt4pmDeadline(responseDeadline);
+
         var updatedRespondent1 = caseData.getRespondent1().toBuilder()
             .primaryAddress(caseData.getRespondent1Copy().getPrimaryAddress())
             .build();
 
-        CaseData caseDataUpdated = caseData.toBuilder()
-            .respondent1AcknowledgeNotificationDate(time.now())
-            .respondent1ResponseDeadline(newResponseDate)
-            .businessProcess(BusinessProcess.ready(ACKNOWLEDGE_CLAIM))
-            .respondent1(updatedRespondent1)
-            .respondent1Copy(null)
-            .build();
+        if (caseData.getAddRespondent2() == YES) {
+            //        1v2 (same sol?)
+            CaseData caseDataUpdatedRespondent2 = caseData.toBuilder()
+                .respondent1AcknowledgeNotificationDate(time.now())
+                .respondent1ResponseDeadline(newResponseDate)
+                .respondent2AcknowledgeNotificationDate(time.now())
+                .respondent2ResponseDeadline(newResponseDate)
+                .businessProcess(BusinessProcess.ready(ACKNOWLEDGE_CLAIM))
+                .respondent1(updatedRespondent1)
+                .respondent1Copy(null)
+                .build();
 
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated.toMap(objectMapper))
-            .build();
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdatedRespondent2.toMap(objectMapper))
+                .build();
+
+        } else {
+            //      2v1
+            CaseData caseDataUpdated = caseData.toBuilder()
+                .respondent1AcknowledgeNotificationDate(time.now())
+                .respondent1ResponseDeadline(newResponseDate)
+                .businessProcess(BusinessProcess.ready(ACKNOWLEDGE_CLAIM))
+                .respondent1(updatedRespondent1)
+                .respondent1Copy(null)
+                .build();
+
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(caseDataUpdated.toMap(objectMapper))
+                .build();
+        }
     }
 
     private SubmittedCallbackResponse buildConfirmation(CallbackParams callbackParams) {
