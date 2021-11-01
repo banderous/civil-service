@@ -57,4 +57,9 @@ public class FeatureToggleService {
             log.error("Error in closing the Launchdarkly client::", e);
         }
     }
+
+
+    public boolean isLRvLRSpecEnabled() {
+        return internalClient.boolVariation("spec", createLDUser().build(), false);
+    }
 }
