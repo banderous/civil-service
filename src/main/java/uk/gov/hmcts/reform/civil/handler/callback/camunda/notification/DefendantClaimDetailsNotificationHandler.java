@@ -23,9 +23,7 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.civil.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.civil.callback.CallbackVersion.V_1;
-import static uk.gov.hmcts.reform.civil.callback.CaseEvent.NOTIFY_RESPONDENT_SOLICITOR1_FOR_CLAIM_DETAILS;
-import static uk.gov.hmcts.reform.civil.callback.CaseEvent.NOTIFY_RESPONDENT_SOLICITOR1_FOR_CLAIM_DETAILS_CC;
-import static uk.gov.hmcts.reform.civil.callback.CaseEvent.NOTIFY_RESPONDENT_SOLICITOR2_FOR_CLAIM_DETAILS;
+import static uk.gov.hmcts.reform.civil.callback.CaseEvent.*;
 import static uk.gov.hmcts.reform.civil.helpers.DateFormatHelper.DATE;
 import static uk.gov.hmcts.reform.civil.helpers.DateFormatHelper.formatLocalDate;
 
@@ -42,6 +40,7 @@ public class DefendantClaimDetailsNotificationHandler extends CallbackHandler im
     public static final String TASK_ID_EMAIL_FIRST_SOL = "NotifyClaimDetailsRespondentSolicitor1";
     public static final String TASK_ID_EMAIL_APP_SOL_CC = "NotifyClaimDetailsApplicantSolicitor1CC";
     public static final String TASK_ID_EMAIL_SECOND_SOL = "NotifyClaimDetailsRespondentSolicitor2";
+    public static final String TASK_ID_EMAIL_APP_SOL_CC_OFFLINE = "NotifyClaimDetailsProceedOfflineApplicantSolicitor1";
 
     private static final String REFERENCE_TEMPLATE = "claim-details-respondent-notification-%s";
 
@@ -68,6 +67,8 @@ public class DefendantClaimDetailsNotificationHandler extends CallbackHandler im
                 return TASK_ID_EMAIL_APP_SOL_CC;
             case NOTIFY_RESPONDENT_SOLICITOR2_FOR_CLAIM_DETAILS:
                 return TASK_ID_EMAIL_SECOND_SOL;
+            case NOTIFY_APPLICANT_SOLICITOR1_FOR_CASE_PROCEEDS_IN_CASEMAN:
+                return TASK_ID_EMAIL_APP_SOL_CC_OFFLINE;
             default:
                 throw new CallbackException(String.format("Callback handler received illegal event: %s", caseEvent));
         }
@@ -131,6 +132,8 @@ public class DefendantClaimDetailsNotificationHandler extends CallbackHandler im
                 return caseData.getApplicantSolicitor1UserDetails().getEmail();
             case NOTIFY_RESPONDENT_SOLICITOR2_FOR_CLAIM_DETAILS:
                 return caseData.getRespondentSolicitor2EmailAddress();
+            case NOTIFY_APPLICANT_SOLICITOR1_FOR_CASE_PROCEEDS_IN_CASEMAN:
+                return caseData.getRespondentSolicitor1EmailAddress();
             default:
                 throw new CallbackException(String.format("Callback handler received illegal event: %s", caseEvent));
         }

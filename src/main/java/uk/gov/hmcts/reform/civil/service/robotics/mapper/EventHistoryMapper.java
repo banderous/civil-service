@@ -119,6 +119,8 @@ public class EventHistoryMapper {
                             "RPA Reason: Claim dismissed. Claimant hasn't notified defendant of the "
                                 + "claim details within the allowed 2 weeks."
                         );
+                    case TAKEN_OFFLINE_AFTER_CLAIM_DETAILS_NOTIFIED:
+                        buildOfflineAfterClaimsDetailsNotified(builder, caseData);
                         break;
                     case TAKEN_OFFLINE_PAST_APPLICANT_RESPONSE_DEADLINE:
                         buildClaimTakenOfflinePastApplicantResponse(builder, caseData);
@@ -445,6 +447,20 @@ public class EventHistoryMapper {
             ));
     }
 
+    private void buildOfflineAfterClaimsDetailsNotified(EventHistory.EventHistoryBuilder builder, CaseData caseData) {
+        builder.miscellaneous(
+            List.of(
+                Event.builder()
+                    .eventSequence(prepareEventSequence(builder.build()))
+                    .eventCode(MISCELLANEOUS.getCode())
+                    .dateReceived(caseData.getSubmittedDate())
+                    .eventDetailsText("RPA Reason: taken offline .")
+                    .eventDetails(EventDetails.builder()
+                                      .miscText("RPA Reason: Unrepresented defendant.")
+                                      .build())
+                    .build()
+            ));
+    }
     private void buildUnregisteredDefendant(EventHistory.EventHistoryBuilder builder, CaseData caseData) {
         builder.miscellaneous(
             List.of(
