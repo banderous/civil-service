@@ -959,10 +959,10 @@ public class CaseDataBuilder {
         return this;
     }
 
-    public CaseDataBuilder atStateAddLitigationFriend_1v2_andAndAddForRespondentOne() {
+    public CaseDataBuilder atStateAddLitigationFriend_1v2_andAndAddForRespondentTwo() {
         atStateClaimDetailsNotified();
         multiPartyClaimOneDefendantSolicitor();
-        selectLitigationFriend("Respondent One:");
+        selectLitigationFriend("Respondent Two:");
         return this;
     }
 
@@ -1295,12 +1295,13 @@ public class CaseDataBuilder {
         return this;
     }
 
-    public CaseDataBuilder atStatePrepareDefendantSolicitorOptions(){
-      //  atStateNotificationAcknowledged();
+    public CaseDataBuilder atStatePrepareDefendantSolicitorOptions() {
+        //  atStateNotificationAcknowledged();
 
         atStateAddLitigationFriend_1v2_andAndAddForBoth();
         return this;
     }
+
     public CaseDataBuilder atDeadlinePassedAfterStateNotificationAcknowledged() {
         atStateNotificationAcknowledged();
         this.claimDismissedDate = respondent1AcknowledgeNotificationDate.plusDays(1);

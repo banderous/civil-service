@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.civil.callback.CallbackParams;
 import uk.gov.hmcts.reform.civil.config.ExitSurveyConfiguration;
 import uk.gov.hmcts.reform.civil.handler.callback.BaseCallbackHandlerTest;
 import uk.gov.hmcts.reform.civil.model.CaseData;
-import uk.gov.hmcts.reform.civil.model.common.DynamicListElement;
 import uk.gov.hmcts.reform.civil.sampledata.CallbackParamsBuilder;
 import uk.gov.hmcts.reform.civil.sampledata.CaseDataBuilder;
 import uk.gov.hmcts.reform.civil.sampledata.CaseDetailsBuilder;
@@ -83,12 +82,10 @@ class AddDefendantLitigationFriendCallbackHandlerTest extends BaseCallbackHandle
     @Nested
     class AboutToSubmit {
         private LocalDateTime localDateTime;
-        private LocalDateTime newDate;
 
         @BeforeEach
         void setup() {
             localDateTime = LocalDateTime.of(2020, 1, 1, 12, 0, 0);
-            newDate = LocalDateTime.of(2020, 1, 15, 16, 0, 0);
             when(time.now()).thenReturn(localDateTime);
 
         }
@@ -107,10 +104,24 @@ class AddDefendantLitigationFriendCallbackHandlerTest extends BaseCallbackHandle
 
             assertThat(response.getData())
                 .containsEntry("respondent1LitigationFriendDate", localDateTime.format(ISO_DATE_TIME))
-                .containsEntry("respondent1LitigationFriendCreatedDate", newDate.format(ISO_DATE_TIME));
+                .containsEntry("respondent1LitigationFriendCreatedDate", localDateTime.format(ISO_DATE_TIME));
+        }
+
+        @Test
+        void shouldUpdateBusinessProcessToReadyWithEvent_whenInvoked1V2DefendantSolicitor() {
+            CaseData caseData = CaseDataBuilder.builder().atStateAddLitigationFriend_1v2_andAndAddForRespondentTwo().build();
+            CallbackParams params = callbackParamsOf(caseData, ABOUT_TO_SUBMIT);
+
+            var response = (AboutToStartOrSubmitCallbackResponse) handler.handle(params);
 
             assertThat(response.getData())
-                .containsKey("respondent1LitigationFriendDate");
+                .extracting("businessProcess")
+                .extracting("camundaEvent", "status")
+                .containsOnly(ADD_DEFENDANT_LITIGATION_FRIEND.name(), "READY");
+
+            assertThat(response.getData())
+                .containsEntry("respondent2LitigationFriendDate", localDateTime.format(ISO_DATE_TIME))
+                .containsEntry("respondent2LitigationFriendCreatedDate", localDateTime.format(ISO_DATE_TIME));
         }
     }
 

@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.civil.model.CaseData;
 import uk.gov.hmcts.reform.civil.model.common.DynamicList;
 import uk.gov.hmcts.reform.civil.model.common.DynamicListElement;
 import uk.gov.hmcts.reform.civil.service.ExitSurveyContentService;
+import uk.gov.hmcts.reform.civil.service.Time;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class AddDefendantLitigationFriendCallbackHandler extends CallbackHandler
 
     private static final List<CaseEvent> EVENTS = List.of(ADD_DEFENDANT_LITIGATION_FRIEND);
 
+    private final Time time;
     private final ObjectMapper objectMapper;
     private final ExitSurveyContentService exitSurveyContentService;
 
@@ -53,37 +55,30 @@ public class AddDefendantLitigationFriendCallbackHandler extends CallbackHandler
     }
 
     private CallbackResponse aboutToSubmit(CallbackParams callbackParams) {
-        CaseData caseDataUpdated = callbackParams.getCaseData();
+        CaseData caseData = callbackParams.getCaseData();
+        LocalDateTime currentDateTime = time.now();
 
-        if (caseDataUpdated.getSelectLitigationFriend().getValue().getLabel().contains("Both")
-            || caseDataUpdated.getSelectLitigationFriend().getValue().getLabel().contains("Respondent One:")
-        ) {
+        CaseData.CaseDataBuilder caseDataUpdated = caseData.toBuilder()
+            .businessProcess(BusinessProcess.ready(ADD_DEFENDANT_LITIGATION_FRIEND));
+
+        if (!caseData.getSelectLitigationFriend().getValue().getLabel().contains("Respondent Two")) {
             caseDataUpdated
-                .toBuilder()
-                .businessProcess(BusinessProcess.ready(ADD_DEFENDANT_LITIGATION_FRIEND))
-                .respondent1LitigationFriendDate(LocalDateTime.now())
+                .respondent1LitigationFriendDate(currentDateTime)
                 .respondent1LitigationFriendCreatedDate(
                     ofNullable(callbackParams.getCaseData().getRespondent1LitigationFriendCreatedDate())
-                        .orElse(LocalDateTime.now()))
-                .build();
-
+                        .orElse(currentDateTime));
         } else {
-            //respondent2LitigationFriend + add the date it was added
             caseDataUpdated
-                .toBuilder()
-                .businessProcess(BusinessProcess.ready(ADD_DEFENDANT_LITIGATION_FRIEND))
-                .respondent2LitigationFriendDate(LocalDateTime.now())
+                .respondent2LitigationFriendDate(currentDateTime)
                 .respondent2LitigationFriendCreatedDate(
                     ofNullable(callbackParams.getCaseData().getRespondent2LitigationFriendCreatedDate())
-                        .orElse(LocalDateTime.now()))
-                .respondent2LitigationFriend(caseDataUpdated.getRespondent1LitigationFriend())
-                .respondent1LitigationFriend(null)
-                //might have to be removed when 1v2 solicitor is different
-                .build();
+                        .orElse(currentDateTime))
+                .respondent2LitigationFriend(caseData.getRespondent1LitigationFriend())
+                .respondent1LitigationFriend(null);
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataUpdated.toMap(objectMapper))
+            .data(caseDataUpdated.build().toMap(objectMapper))
             .build();
     }
 
