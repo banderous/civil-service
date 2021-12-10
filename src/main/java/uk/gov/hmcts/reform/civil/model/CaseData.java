@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.civil.model.documents.Document;
 import uk.gov.hmcts.reform.civil.model.dq.Applicant1DQ;
 import uk.gov.hmcts.reform.civil.model.dq.ExpertRequirements;
 import uk.gov.hmcts.reform.civil.model.dq.Respondent1DQ;
+import uk.gov.hmcts.reform.civil.model.genapp.ApplicationType;
 import uk.gov.hmcts.reform.civil.model.interestcalc.InterestClaimFromType;
 import uk.gov.hmcts.reform.civil.model.interestcalc.InterestClaimOptions;
 import uk.gov.hmcts.reform.civil.model.interestcalc.InterestClaimUntilType;
@@ -32,6 +33,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import javax.validation.Valid;
 
 import static uk.gov.hmcts.reform.civil.enums.BusinessProcessStatus.FINISHED;
@@ -44,6 +46,7 @@ public class CaseData implements MappableObject {
     private final Long ccdCaseReference;
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private final CaseState ccdState;
+    private final ApplicationType gaType;
     private final SolicitorReferences solicitorReferences;
     private final String respondentSolicitor2Reference;
     private final CourtLocation courtLocation;
@@ -183,6 +186,12 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     private final Applicant1DQ applicant1DQ;
 
+    YesOrNo respondentOrderAgreement;
+
+    @JsonProperty("gaRespondentAgreement")
+    private void unpackAgreementFromNestedObject(Map<String, YesOrNo> gaRespondentAgreement) {
+        respondentOrderAgreement = gaRespondentAgreement.get("orderAgreementYesNo");
+    }
     public boolean hasNoOngoingBusinessProcess() {
         return businessProcess == null
             || businessProcess.getStatus() == null

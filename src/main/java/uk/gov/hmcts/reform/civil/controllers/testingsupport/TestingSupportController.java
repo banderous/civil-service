@@ -50,6 +50,12 @@ public class TestingSupportController {
         return new ResponseEntity<>(businessProcessInfo, HttpStatus.OK);
     }
 
+    @GetMapping("/testing-support/case/{caseId}")
+    public ResponseEntity<CaseData> getCaseInfo(@PathVariable("caseId") Long caseId) {
+        CaseData caseData = caseDetailsConverter.toCaseData(coreCaseDataService.getCase(caseId));
+        return new ResponseEntity<>(caseData, HttpStatus.OK);
+    }
+
     @Data
     private static class BusinessProcessInfo {
         private BusinessProcess businessProcess;
