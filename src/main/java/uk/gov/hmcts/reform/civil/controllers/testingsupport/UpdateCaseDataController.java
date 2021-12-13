@@ -10,11 +10,12 @@ import org.springframework.web.bind.annotation.*;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.civil.CaseDefinitionConstants;
 import uk.gov.hmcts.reform.civil.service.CoreCaseDataService;
 
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.civil.callback.CaseEvent.UPDATE_CASE_DATA;
+import static uk.gov.hmcts.reform.civil.callback.CaseEvent.*;
 
 @Api
 @Slf4j
@@ -35,6 +36,33 @@ public class UpdateCaseDataController {
             coreCaseDataService.submitUpdate(authorisation, caseId.toString(), caseDataContent(startEventResponse, caseDataMap));
         } catch (FeignException e) {
             log.error(String.format("Updating case data failed: %s", e.contentUTF8()));
+            throw e;
+        }
+    }
+
+    @PostMapping("/testing-support/case")
+    public void createCaseData(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody Map<String, Object> caseDataMap) {
+        try {
+            var startEventResponse = coreCaseDataService.startCaseForCaseworker(CREATE_CLAIM.name(), CaseDefinitionConstants.CASE_TYPE, authorisation);
+            coreCaseDataService.submitForCaseWorker(caseDataContent(startEventResponse, caseDataMap), CaseDefinitionConstants.CASE_TYPE);
+        } catch (FeignException e) {
+            log.error(String.format("Creating case failed: %s", e.contentUTF8()));
+            throw e;
+        }
+    }
+
+    @PostMapping("/testing-support/case/apps")
+    public void createAppsCaseData(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody Map<String, Object> caseDataMap) {
+        try {
+            var startEventResponse = coreCaseDataService.startCaseForCaseworker(GENERAL_APPLICATION_CREATION.name(),
+                                                                                CaseDefinitionConstants.GENERAL_APPLICATION_TYPE, authorisation);
+            coreCaseDataService.submitForCaseWorker(caseDataContent(startEventResponse, caseDataMap), CaseDefinitionConstants.GENERAL_APPLICATION_TYPE);
+        } catch (FeignException e) {
+            log.error(String.format("Creating case failed: %s", e.contentUTF8()));
             throw e;
         }
     }

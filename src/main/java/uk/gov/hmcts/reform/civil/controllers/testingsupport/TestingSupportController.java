@@ -6,10 +6,12 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.civil.helpers.CaseDetailsConverter;
 import uk.gov.hmcts.reform.civil.model.BusinessProcess;
@@ -51,8 +53,9 @@ public class TestingSupportController {
     }
 
     @GetMapping("/testing-support/case/{caseId}")
-    public ResponseEntity<CaseData> getCaseInfo(@PathVariable("caseId") Long caseId) {
-        CaseData caseData = caseDetailsConverter.toCaseData(coreCaseDataService.getCase(caseId));
+    public ResponseEntity<CaseData> getCaseInfo(@PathVariable("caseId") Long caseId,
+                                                @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation) {
+        CaseData caseData = caseDetailsConverter.toCaseData(coreCaseDataService.getCase(caseId, authorisation));
         return new ResponseEntity<>(caseData, HttpStatus.OK);
     }
 

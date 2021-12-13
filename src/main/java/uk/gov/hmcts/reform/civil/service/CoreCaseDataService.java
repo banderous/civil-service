@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.civil.model.CaseData;
 import uk.gov.hmcts.reform.civil.model.search.Query;
 import uk.gov.hmcts.reform.civil.service.data.UserAuthContent;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,7 @@ import static uk.gov.hmcts.reform.civil.CaseDefinitionConstants.JURISDICTION;
 @Service
 @RequiredArgsConstructor
 public class CoreCaseDataService {
+    public static final String GENERAL_APPLICATION_TYPE = "GENERALAPPLICATION";
 
     private final IdamClient idamClient;
     private final CoreCaseDataApi coreCaseDataApi;
@@ -91,9 +93,12 @@ public class CoreCaseDataService {
         return coreCaseDataApi.searchCases(userToken, authTokenGenerator.generate(), CASE_TYPE, query.toString());
     }
 
+    public CaseDetails getCase(Long caseId, String userToken) {
+        return coreCaseDataApi.getCase(userToken, authTokenGenerator.generate(), caseId.toString());
+    }
     public CaseDetails getCase(Long caseId) {
         String userToken = idamClient.getAccessToken(userConfig.getUserName(), userConfig.getPassword());
-        return coreCaseDataApi.getCase(userToken, authTokenGenerator.generate(), caseId.toString());
+        return getCase(caseId, userToken);
     }
 
     private UserAuthContent getSystemUpdateUser() {
@@ -120,4 +125,30 @@ public class CoreCaseDataService {
             .data(payload)
             .build();
     }
+    public StartEventResponse startCaseForCaseworker(String eventId, String caseType, String userToken) {
+        UserInfo userInfo = idamClient.getUserInfo(userToken);
+        return coreCaseDataApi.startForCaseworker(
+            userToken,
+            authTokenGenerator.generate(),
+            userInfo.getUid(),
+            JURISDICTION,
+            caseType,
+            eventId);
+    }
+
+    public CaseData submitForCaseWorker(CaseDataContent caseDataContent, String caseType) {
+        UserAuthContent systemUpdateUser = getSystemUpdateUser();
+        CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
+            systemUpdateUser.getUserToken(),
+            authTokenGenerator.generate(),
+            systemUpdateUser.getUserId(),
+            JURISDICTION,
+            caseType,
+            true,
+            caseDataContent
+        );
+        return caseDetailsConverter.toCaseData(caseDetails);
+    }
+
+
 }

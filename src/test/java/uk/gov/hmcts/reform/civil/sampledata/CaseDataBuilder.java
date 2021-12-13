@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.civil.model.dq.Respondent1DQ;
 import uk.gov.hmcts.reform.civil.model.dq.WelshLanguageRequirements;
 import uk.gov.hmcts.reform.civil.model.dq.Witnesses;
 import uk.gov.hmcts.reform.civil.model.genapp.ApplicationType;
+import uk.gov.hmcts.reform.civil.model.genapp.RespondentOrderAgreement;
 import uk.gov.hmcts.reform.civil.model.interestcalc.InterestClaimFromType;
 import uk.gov.hmcts.reform.civil.model.interestcalc.InterestClaimOptions;
 import uk.gov.hmcts.reform.civil.model.interestcalc.InterestClaimUntilType;
@@ -1575,7 +1576,8 @@ public class CaseDataBuilder {
                         .childApplicationType(List.of(
                             GeneralApplicationTypes.EXTEND_TIME,
                             GeneralApplicationTypes.STAY_THE_CLAIM)).build())
-            .respondentOrderAgreement(YES)
+            .gaRespondentAgreement(
+                RespondentOrderAgreement.builder().orderAgreementYesNo(YES).build())
             .allocatedTrack(allocatedTrack)
             .solicitorReferences(solicitorReferences)
             .courtLocation(courtLocation)

@@ -24,6 +24,8 @@ import uk.gov.hmcts.reform.civil.model.dq.Applicant1DQ;
 import uk.gov.hmcts.reform.civil.model.dq.ExpertRequirements;
 import uk.gov.hmcts.reform.civil.model.dq.Respondent1DQ;
 import uk.gov.hmcts.reform.civil.model.genapp.ApplicationType;
+import uk.gov.hmcts.reform.civil.model.genapp.GeneralApplication;
+import uk.gov.hmcts.reform.civil.model.genapp.RespondentOrderAgreement;
 import uk.gov.hmcts.reform.civil.model.interestcalc.InterestClaimFromType;
 import uk.gov.hmcts.reform.civil.model.interestcalc.InterestClaimOptions;
 import uk.gov.hmcts.reform.civil.model.interestcalc.InterestClaimUntilType;
@@ -47,6 +49,8 @@ public class CaseData implements MappableObject {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private final CaseState ccdState;
     private final ApplicationType gaType;
+    private final RespondentOrderAgreement gaRespondentAgreement;
+    private final List<Element<GeneralApplication>> generalApplicationDetails;
     private final SolicitorReferences solicitorReferences;
     private final String respondentSolicitor2Reference;
     private final CourtLocation courtLocation;
@@ -186,12 +190,6 @@ public class CaseData implements MappableObject {
     @JsonUnwrapped
     private final Applicant1DQ applicant1DQ;
 
-    YesOrNo respondentOrderAgreement;
-
-    @JsonProperty("gaRespondentAgreement")
-    private void unpackAgreementFromNestedObject(Map<String, YesOrNo> gaRespondentAgreement) {
-        respondentOrderAgreement = gaRespondentAgreement.get("orderAgreementYesNo");
-    }
     public boolean hasNoOngoingBusinessProcess() {
         return businessProcess == null
             || businessProcess.getStatus() == null
