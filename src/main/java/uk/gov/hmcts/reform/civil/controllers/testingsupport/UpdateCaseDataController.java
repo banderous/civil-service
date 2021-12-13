@@ -5,10 +5,8 @@ import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -28,10 +26,13 @@ public class UpdateCaseDataController {
     private final CoreCaseDataService coreCaseDataService;
 
     @PutMapping("/testing-support/case/{caseId}")
-    public void updateCaseData(@PathVariable("caseId") Long caseId, @RequestBody Map<String, Object> caseDataMap) {
+    public void updateCaseData(
+        @PathVariable("caseId") Long caseId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+        @RequestBody Map<String, Object> caseDataMap) {
         try {
-            var startEventResponse = coreCaseDataService.startUpdate(caseId.toString(), UPDATE_CASE_DATA);
-            coreCaseDataService.submitUpdate(caseId.toString(), caseDataContent(startEventResponse, caseDataMap));
+            var startEventResponse = coreCaseDataService.startUpdate(authorisation, caseId.toString(), UPDATE_CASE_DATA);
+            coreCaseDataService.submitUpdate(authorisation, caseId.toString(), caseDataContent(startEventResponse, caseDataMap));
         } catch (FeignException e) {
             log.error(String.format("Updating case data failed: %s", e.contentUTF8()));
             throw e;

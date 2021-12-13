@@ -44,11 +44,17 @@ public class CoreCaseDataService {
 
     public StartEventResponse startUpdate(String caseId, CaseEvent eventName) {
         UserAuthContent systemUpdateUser = getSystemUpdateUser();
-
+        return startUpdate(systemUpdateUser, caseId, eventName);
+    }
+    public StartEventResponse startUpdate(String token, String caseId, CaseEvent eventName) {
+        UserAuthContent user = getUserBasedOnToken(token);
+        return startUpdate(user, caseId, eventName);
+    }
+    public StartEventResponse startUpdate(UserAuthContent user, String caseId, CaseEvent eventName) {
         return coreCaseDataApi.startEventForCaseWorker(
-            systemUpdateUser.getUserToken(),
+            user.getUserToken(),
             authTokenGenerator.generate(),
-            systemUpdateUser.getUserId(),
+            user.getUserId(),
             JURISDICTION,
             CASE_TYPE,
             caseId,
@@ -58,11 +64,19 @@ public class CoreCaseDataService {
 
     public CaseData submitUpdate(String caseId, CaseDataContent caseDataContent) {
         UserAuthContent systemUpdateUser = getSystemUpdateUser();
+        return submitUpdate(systemUpdateUser, caseId, caseDataContent);
+    }
 
+    public CaseData submitUpdate(String token, String caseId, CaseDataContent caseDataContent) {
+        UserAuthContent user = getUserBasedOnToken(token);
+        return submitUpdate(user, caseId, caseDataContent);
+    }
+
+    public CaseData submitUpdate(UserAuthContent user, String caseId, CaseDataContent caseDataContent) {
         CaseDetails caseDetails = coreCaseDataApi.submitEventForCaseWorker(
-            systemUpdateUser.getUserToken(),
+            user.getUserToken(),
             authTokenGenerator.generate(),
-            systemUpdateUser.getUserId(),
+            user.getUserId(),
             JURISDICTION,
             CASE_TYPE,
             caseId,
@@ -84,6 +98,11 @@ public class CoreCaseDataService {
 
     private UserAuthContent getSystemUpdateUser() {
         String userToken = idamClient.getAccessToken(userConfig.getUserName(), userConfig.getPassword());
+        String userId = idamClient.getUserInfo(userToken).getUid();
+        return UserAuthContent.builder().userToken(userToken).userId(userId).build();
+    }
+
+    private UserAuthContent getUserBasedOnToken(String userToken) {
         String userId = idamClient.getUserInfo(userToken).getUid();
         return UserAuthContent.builder().userToken(userToken).userId(userId).build();
     }
