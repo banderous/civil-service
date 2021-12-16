@@ -136,12 +136,13 @@ public class CoreCaseDataService {
             eventId);
     }
 
-    public CaseData submitForCaseWorker(CaseDataContent caseDataContent, String caseType) {
-        UserAuthContent systemUpdateUser = getSystemUpdateUser();
+    public CaseData submitForCaseWorker(CaseDataContent caseDataContent, String caseType, String userToken) {
+        UserInfo userInfo = idamClient.getUserInfo(userToken);
+        //UserAuthContent systemUpdateUser = getSystemUpdateUser();
         CaseDetails caseDetails = coreCaseDataApi.submitForCaseworker(
-            systemUpdateUser.getUserToken(),
+            userToken,
             authTokenGenerator.generate(),
-            systemUpdateUser.getUserId(),
+            userInfo.getUid(),
             JURISDICTION,
             caseType,
             true,

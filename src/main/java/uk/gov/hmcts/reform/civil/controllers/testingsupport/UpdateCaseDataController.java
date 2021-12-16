@@ -46,7 +46,7 @@ public class UpdateCaseDataController {
         @RequestBody Map<String, Object> caseDataMap) {
         try {
             var startEventResponse = coreCaseDataService.startCaseForCaseworker(CREATE_CLAIM.name(), CaseDefinitionConstants.CASE_TYPE, authorisation);
-            coreCaseDataService.submitForCaseWorker(caseDataContent(startEventResponse, caseDataMap), CaseDefinitionConstants.CASE_TYPE);
+            coreCaseDataService.submitForCaseWorker(caseDataContent(startEventResponse, caseDataMap), CaseDefinitionConstants.CASE_TYPE, authorisation);
         } catch (FeignException e) {
             log.error(String.format("Creating case failed: %s", e.contentUTF8()));
             throw e;
@@ -60,7 +60,7 @@ public class UpdateCaseDataController {
         try {
             var startEventResponse = coreCaseDataService.startCaseForCaseworker(GENERAL_APPLICATION_CREATION.name(),
                                                                                 CaseDefinitionConstants.GENERAL_APPLICATION_TYPE, authorisation);
-            coreCaseDataService.submitForCaseWorker(caseDataContent(startEventResponse, caseDataMap), CaseDefinitionConstants.GENERAL_APPLICATION_TYPE);
+            coreCaseDataService.submitForCaseWorker(caseDataContent(startEventResponse, caseDataMap), CaseDefinitionConstants.GENERAL_APPLICATION_TYPE, authorisation);
         } catch (FeignException e) {
             log.error(String.format("Creating case failed: %s", e.contentUTF8()));
             throw e;
