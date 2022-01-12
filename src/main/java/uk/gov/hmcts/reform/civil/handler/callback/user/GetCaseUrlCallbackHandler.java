@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.GetCaseCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.metadatafields.CaseViewField;
 import uk.gov.hmcts.reform.civil.callback.CallbackParams;
-import uk.gov.hmcts.reform.civil.model.CaseData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,13 +13,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetCaseUrlCallbackHandler {
 
-
-
     public GetCaseCallbackResponse getMetaData(CallbackParams callbackParams) {
         GetCaseCallbackResponse getCaseCallbackResponse
             = new GetCaseCallbackResponse();
         CaseViewField caseViewField = new CaseViewField();
-        caseViewField.setId("Hello");
+        caseViewField.setId("[INJECTED_DATA.respondentSolicitor2Reference]");
+        caseViewField.setValue("200");
+        caseViewField.setMetadata(true);
         List<CaseViewField> caseViewFields = new ArrayList<>();
         caseViewFields.add(caseViewField);
 

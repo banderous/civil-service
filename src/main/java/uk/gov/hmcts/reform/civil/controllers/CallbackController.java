@@ -6,7 +6,9 @@ import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,11 +72,10 @@ public class CallbackController {
         return callbackHandlerFactory.dispatch(callbackParams);
     }
 
-
     @PostMapping(path = {
         "/getCaseCallBack"
     })
-    public GetCaseCallbackResponse getCaseCallbackResponse (
+    public ResponseEntity<GetCaseCallbackResponse> getCaseCallbackResponse(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @NotNull @RequestBody CallbackRequest callback,
         @PathVariable("version") Optional<CallbackVersion> version,
@@ -86,8 +87,9 @@ public class CallbackController {
             .params(ImmutableMap.of(CallbackParams.Params.BEARER_TOKEN, authorisation))
             .version(version.orElse(null))
             .pageId(pageId.orElse(null))
+            .caseData(caseDetailsConverter.toCaseData(callback.getCaseDetails()))
             .build();
 
-        return handler.getMetaData(callbackParams);
+        return new ResponseEntity<GetCaseCallbackResponse>(handler.getMetaData(callbackParams), HttpStatus.OK);
     }
 }
