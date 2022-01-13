@@ -140,31 +140,6 @@ public class FlowPredicate {
         && caseData.getRespondentResponseIsSame() == NO
         && caseData.getRespondent1ClaimResponseType() != caseData.getRespondent2ClaimResponseType();
 
-    public static final Predicate<CaseData> allResponsesReceived = caseData ->
-        getPredicateForResponses(caseData);
-
-    private static boolean getPredicateForResponses(CaseData caseData) {
-        switch (getMultiPartyScenario(caseData)) {
-            case ONE_V_TWO_TWO_LEGAL_REP:
-                return caseData.getRespondent1ResponseDate() != null && caseData.getRespondent2ResponseDate() != null;
-            default:
-                return caseData.getRespondent1ResponseDate() != null;
-        }
-    }
-
-    public static final Predicate<CaseData> awaitingResponses = caseData ->
-        getPredicateForAwaitingResponses(caseData);
-
-    private static boolean getPredicateForAwaitingResponses(CaseData caseData) {
-        switch (getMultiPartyScenario(caseData)) {
-            case ONE_V_TWO_TWO_LEGAL_REP:
-                return (caseData.getRespondent1ResponseDate() != null && caseData.getRespondent2ResponseDate() == null)
-                    || (caseData.getRespondent1ResponseDate() == null && caseData.getRespondent2ResponseDate() != null);
-            default:
-                return false;
-        }
-    }
-
     private static boolean getPredicateForResponseType(CaseData caseData, RespondentResponseType responseType) {
         boolean basePredicate = caseData.getRespondent1ResponseDate() != null
             && caseData.getRespondent1ClaimResponseType() == responseType;
@@ -174,14 +149,8 @@ public class FlowPredicate {
                 predicate = basePredicate && (caseData.getRespondentResponseIsSame() == YES
                     || caseData.getRespondent2ClaimResponseType() == responseType);
                 break;
-            case ONE_V_TWO_TWO_LEGAL_REP:
-                predicate = basePredicate && caseData.getRespondent2ClaimResponseType() == responseType;
-                break;
             case ONE_V_ONE:
                 predicate = basePredicate;
-                break;
-            case TWO_V_ONE:
-                predicate = basePredicate && caseData.getRespondent1ClaimResponseTypeToApplicant2() == responseType;
                 break;
             default:
                 break;

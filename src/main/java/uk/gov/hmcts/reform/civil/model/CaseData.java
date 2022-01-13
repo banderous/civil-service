@@ -140,16 +140,28 @@ public class CaseData implements MappableObject {
     private final ResponseDocument respondent1SpecDefenceResponseDocument;
 
     private final RespondentResponseTypeSpec respondent1ClaimResponseTypeForSpec;
+    private final RespondentResponseTypeSpecPaidStatus respondent1ClaimResponsePaymentAdmissionForSpec;
+    private final RespondentResponsePartAdmissionPaymentTimeLRspec defenceAdmitPartPaymentTimeRouteRequired;
     private final String defenceRouteRequired;
     private final String responseClaimTrack;
     private final RespondToClaim respondToClaim;
+    private final RespondToClaim respondToAdmittedClaim;
+    private final BigDecimal respondToAdmittedClaimOwingAmount;
+    private final PaymentUponCourtOrder respondent1CourtOrderPaymentByDate;
+    private final PaymentUponCourtOrder respondent1CourtOrderPaymentByPlan;
+    private final RespondToClaimAdmitPartLRspec respondToClaimAdmitPartLRspec;
+    private final UnemployedComplexTypeLRspec respondToClaimAdmitPartUnemployedLRspec;
+    private final Respondent1EmployerDetailsLRspec responseClaimAdmitPartEmployer;
     // Fields related to ROC-9453 & ROC-9455
     private final YesOrNo responseClaimMediationSpecRequired;
+    private final YesOrNo defenceAdmitPartEmploymentTypeRequired;
     private final YesOrNo responseClaimExpertSpecRequired;
     private final String responseClaimWitnesses;
     private final YesOrNo smallClaimHearingInterpreterRequired;
     private final String smallClaimHearingInterpreterDescription;
+    private final List<EmploymentTypeCheckboxFixedListLRspec> respondToClaimAdmitPartEmploymentTypeLRspec;
 
+    private final String additionalInformationForJudge;
     @JsonUnwrapped
     private final ExpertRequirements respondToClaimExperts;
 
@@ -180,6 +192,7 @@ public class CaseData implements MappableObject {
     }
 
     private final LitigationFriend respondent1LitigationFriend;
+    private final LitigationFriend respondent2LitigationFriend;
 
     private final YesOrNo applicant1LitigationFriendRequired;
     private final LitigationFriend applicant1LitigationFriend;
@@ -225,4 +238,7 @@ public class CaseData implements MappableObject {
     private final YesOrNo isRespondent1;
 
     private final List<IdValue<Bundle>> caseBundles;
+
+    private final Respondent1DebtLRspec specDefendant1Debts;
+    private final Respondent1SelfEmploymentLRspec specDefendant1SelfEmploymentDetails;
 }

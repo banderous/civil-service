@@ -192,7 +192,7 @@ class FlowPredicateTest {
 
         @Test
         void shouldReturnTrue_whenRespondentNotRepresented() {
-            CaseData caseData = CaseDataBuilder.builder().atStatePendingClaimIssuedUnRepresentedDefendant().build();
+            CaseData caseData = CaseDataBuilder.builder().atStatePendingClaimIssuedUnrepresentedDefendant().build();
             assertTrue(respondent1NotRepresented.test(caseData));
         }
 
@@ -208,7 +208,7 @@ class FlowPredicateTest {
 
         @Test
         void shouldReturnTrue_whenRespondentNotRegistered() {
-            CaseData caseData = CaseDataBuilder.builder().atStatePendingClaimIssuedUnRegisteredDefendant().build();
+            CaseData caseData = CaseDataBuilder.builder().atStatePendingClaimIssuedUnregisteredDefendant().build();
             assertTrue(respondent1OrgNotRegistered.test(caseData));
         }
 
@@ -510,45 +510,6 @@ class FlowPredicateTest {
             CaseDataBuilder caseDataBuilder;
 
             @Nested
-            class OneVTwoWithTwoReps {
-
-                @BeforeEach
-                void setup() {
-                    caseDataBuilder = CaseDataBuilder.builder().multiPartyClaimTwoDefendantSolicitors();
-                }
-
-                @Test
-                void shouldReturnTrue_whenDefendantsBothResponded() {
-                    CaseData caseData = caseDataBuilder
-                        .atStateRespondentFullDefenceAfterNotifyClaimDetails()
-                        .respondent2Responds(FULL_DEFENCE)
-                        .build();
-
-                    assertTrue(fullDefence.test(caseData));
-                }
-
-                @Test
-                void shouldReturnFalse_whenOnlyDefendant1Responded() {
-                    CaseData caseData = CaseDataBuilder.builder()
-                        .multiPartyClaimTwoDefendantSolicitors()
-                        .atStateRespondentFullDefenceAfterNotifyClaimDetails()
-                        .build();
-
-                    assertFalse(fullDefence.test(caseData));
-                }
-
-                @Test
-                void shouldReturnFalse_whenOnlyDefendant2Responded() {
-                    CaseData caseData = CaseDataBuilder.builder()
-                        .multiPartyClaimTwoDefendantSolicitors()
-                        .respondent2Responds(FULL_DEFENCE)
-                        .build();
-
-                    assertFalse(fullDefence.test(caseData));
-                }
-            }
-
-            @Nested
             class OneVTwoWithOneRep {
 
                 @BeforeEach
@@ -593,35 +554,6 @@ class FlowPredicateTest {
                 void shouldReturnFalse_whenOnlyOneResponse() {
                     CaseData caseData = caseDataBuilder
                         .atStateRespondentFullDefenceAfterNotifyClaimDetails()
-                        .build();
-
-                    assertFalse(fullDefence.test(caseData));
-                }
-            }
-
-            @Nested
-            class TwoApplicants {
-
-                @BeforeEach
-                void setup() {
-                    caseDataBuilder = CaseDataBuilder.builder().multiPartyClaimTwoApplicants();
-                }
-
-                @Test
-                void shouldReturnTrue_whenResponsesToBothApplicants() {
-                    CaseData caseData = caseDataBuilder
-                        .atStateRespondentFullDefenceAfterNotifyClaimDetails()
-                        .respondent1ClaimResponseTypeToApplicant2(FULL_DEFENCE)
-                        .build();
-
-                    assertTrue(fullDefence.test(caseData));
-                }
-
-                @Test
-                void shouldReturnFalse_whenDifferentResponses() {
-                    CaseData caseData = caseDataBuilder
-                        .atStateRespondentFullDefenceAfterNotifyClaimDetails()
-                        .respondent1ClaimResponseTypeToApplicant2(PART_ADMISSION)
                         .build();
 
                     assertFalse(fullDefence.test(caseData));
