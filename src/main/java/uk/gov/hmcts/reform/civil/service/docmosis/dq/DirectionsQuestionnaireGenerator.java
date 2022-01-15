@@ -36,8 +36,9 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.civil.enums.YesOrNo.YES;
 import static uk.gov.hmcts.reform.civil.enums.YesOrNo.NO;
 import static uk.gov.hmcts.reform.civil.service.docmosis.DocmosisTemplates.N181;
+import static uk.gov.hmcts.reform.civil.service.flowstate.FlowState.Main.AWAITING_RESPONSES_FULL_DEFENCE_RECEIVED;
+import static uk.gov.hmcts.reform.civil.service.flowstate.FlowState.Main.AWAITING_RESPONSES_NON_FULL_DEFENCE_RECEIVED;
 import static uk.gov.hmcts.reform.civil.service.flowstate.FlowState.Main.FULL_DEFENCE;
-import static uk.gov.hmcts.reform.civil.service.flowstate.FlowState.Main.AWAITING_RESPONSES_RECEIVED;
 import static uk.gov.hmcts.reform.civil.service.flowstate.FlowState.Main.ALL_RESPONSES_RECEIVED;
 import static uk.gov.hmcts.reform.civil.utils.ElementUtils.unwrapElements;
 
@@ -183,7 +184,8 @@ public class DirectionsQuestionnaireGenerator implements TemplateDataGenerator<D
 
     private Boolean isRespondentState(CaseData caseData) {
         String state = stateFlowEngine.evaluate(caseData).getState().getName();
-        return state.equals(FULL_DEFENCE.fullName()) || state.equals(AWAITING_RESPONSES_RECEIVED.fullName()) || state.equals(ALL_RESPONSES_RECEIVED.fullName());
+        return state.equals(FULL_DEFENCE.fullName()) || state.equals(AWAITING_RESPONSES_FULL_DEFENCE_RECEIVED
+            .fullName()) || state.equals(ALL_RESPONSES_RECEIVED.fullName());
     }
 
     private Party getApplicant(CaseData caseData) {
