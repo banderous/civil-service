@@ -17,7 +17,7 @@ public class GetCaseUrlCallbackHandler {
         GetCaseCallbackResponse getCaseCallbackResponse
             = new GetCaseCallbackResponse();
         CaseViewField caseViewField = new CaseViewField();
-        caseViewField.setId("[INJECTED_DATA.respondentSolicitor2Reference]");
+        caseViewField.setId("[INJECTED_DATA.totalClaimAmount]");
         caseViewField.setValue("200");
         caseViewField.setMetadata(true);
         List<CaseViewField> caseViewFields = new ArrayList<>();
