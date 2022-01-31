@@ -9,11 +9,14 @@ import uk.gov.hmcts.reform.civil.callback.Callback;
 import uk.gov.hmcts.reform.civil.callback.CallbackHandler;
 import uk.gov.hmcts.reform.civil.callback.CallbackParams;
 import uk.gov.hmcts.reform.civil.callback.CaseEvent;
+import uk.gov.hmcts.reform.civil.model.CaseData;
+import uk.gov.hmcts.reform.civil.model.bs.BreathingSpaceState;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.civil.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.civil.callback.CallbackType.ABOUT_TO_SUBMIT;
@@ -43,17 +46,11 @@ public class BreathingSpaceLiftCallbackHandler extends CallbackHandler {
         AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder responseBuilder = AboutToStartOrSubmitCallbackResponse.builder();
         List<String> errors = new ArrayList<>();
 
-        /*
-        TODO check if the case can lift breathing space.
-        State conditions should be in ccd-definition,
-        but we need to check here that there is a breathing space and it is not lifted yet
+        CaseData caseData = params.getCaseData();
 
-        if (claim notin breathingSpace) {
-          errors.add "Can't lift breathing space. Claim is not in breathing space."
-        }
-         */
+        canLiftBreathingState(caseData).ifPresent(errors::add);
         if (!errors.isEmpty()) {
-            responseBuilder.errors(errors);
+            return responseBuilder.errors(errors).build();
         }
 
         return responseBuilder.build();
@@ -63,17 +60,33 @@ public class BreathingSpaceLiftCallbackHandler extends CallbackHandler {
         AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder responseBuilder = AboutToStartOrSubmitCallbackResponse.builder();
         List<String> errors = new ArrayList<>();
 
-        /*
-        TODO check if the case can lift breathing space.
-        State conditions should be in ccd-definition,
-        but we need to check here that there is not already a breathing space
-        JIC, so that the caseworker and the applicant are in two different computers at the same time
-         */
+        CaseData caseData = params.getCaseData();
+
+        canLiftBreathingState(caseData).ifPresent(errors::add);
         if (!errors.isEmpty()) {
-            responseBuilder.errors(errors);
+            return responseBuilder.errors(errors).build();
+        } else {
+            // TODO set BS state to LIFTED and replace caseData on responseBuilder
         }
 
         return responseBuilder.build();
+    }
+
+    /**
+     * State constraints are assumed to be checked at frontend
+     *
+     * <p>Assumes that front does nothing with state, that BS can't be multiple and that state will
+     * be changed to "ENTERED" or "LIFTED" only through backend submit handlers.</p>
+     *
+     * @param caseData the case data.
+     * @return an empty optional for true, a descriptive error message otherwise.
+     */
+    private Optional<String> canLiftBreathingState(CaseData caseData) {
+        if (caseData.getBreathingSpace() != null && caseData.getBreathingSpace().getState() != BreathingSpaceState.ENTERED) {
+            return Optional.of("Can't lift Breathing Space. There is none active.");
+        } else {
+            return Optional.empty();
+        }
     }
 
     CallbackResponse submitted(CallbackParams params) {

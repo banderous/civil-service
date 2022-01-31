@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.civil.handler.callback.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
@@ -9,11 +10,14 @@ import uk.gov.hmcts.reform.civil.callback.Callback;
 import uk.gov.hmcts.reform.civil.callback.CallbackHandler;
 import uk.gov.hmcts.reform.civil.callback.CallbackParams;
 import uk.gov.hmcts.reform.civil.callback.CaseEvent;
+import uk.gov.hmcts.reform.civil.model.CaseData;
+import uk.gov.hmcts.reform.civil.model.bs.BreathingSpaceState;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.civil.callback.CallbackType.ABOUT_TO_START;
 import static uk.gov.hmcts.reform.civil.callback.CallbackType.ABOUT_TO_SUBMIT;
@@ -21,6 +25,7 @@ import static uk.gov.hmcts.reform.civil.callback.CallbackType.SUBMITTED;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BreathingSpaceEnterCallbackHandler extends CallbackHandler {
 
     private static final List<CaseEvent> EVENTS = Collections.singletonList(CaseEvent.BREATHING_SPACE_ENTER);
@@ -43,17 +48,11 @@ public class BreathingSpaceEnterCallbackHandler extends CallbackHandler {
         AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder responseBuilder = AboutToStartOrSubmitCallbackResponse.builder();
         List<String> errors = new ArrayList<>();
 
-        /*
-        TODO check if the case can enter breathing space.
-        State conditions should be in ccd-definition,
-        but we need to check here that there is not already a breathing space
+        CaseData caseData = params.getCaseData();
 
-        if (claim already in breathingSpace) {
-          errors.add "Can't enter breathing space. Claim is already there."
-        }
-         */
+        canEnterBreathingState(caseData).ifPresent(errors::add);
         if (!errors.isEmpty()) {
-            responseBuilder.errors(errors);
+            return responseBuilder.errors(errors).build();
         }
 
         return responseBuilder.build();
@@ -63,17 +62,42 @@ public class BreathingSpaceEnterCallbackHandler extends CallbackHandler {
         AboutToStartOrSubmitCallbackResponse.AboutToStartOrSubmitCallbackResponseBuilder responseBuilder = AboutToStartOrSubmitCallbackResponse.builder();
         List<String> errors = new ArrayList<>();
 
-        /*
-        TODO check if the case can enter breathing space.
-        State conditions should be in ccd-definition,
-        but we need to check here that there is not already a breathing space
-        JIC, so that the caseworker and the applicant are in two different computers at the same time
-         */
+        CaseData caseData = params.getCaseData();
+
+        canEnterBreathingState(caseData).ifPresent(errors::add);
         if (!errors.isEmpty()) {
-            responseBuilder.errors(errors);
+            return responseBuilder.errors(errors).build();
+        } else {
+            // TODO set BreathingSpace state to ENTERED and replace caseData in responseBuilder
         }
 
         return responseBuilder.build();
+    }
+
+    /**
+     * State constraints are assumed to be checked at frontend
+     *
+     * <p>Assumes that front does nothing with state, that BS can't be multiple and that state will
+     * be changed to "ENTERED" or "LIFTED" only through backend submit handlers.</p>
+     *
+     * @param caseData the case data.
+     * @return an empty optional for true, a descriptive error message otherwise.
+     */
+    private Optional<String> canEnterBreathingState(CaseData caseData) {
+        if (caseData.getBreathingSpace() != null && caseData.getBreathingSpace().getState() != null) {
+            if (caseData.getBreathingSpace().getState() == BreathingSpaceState.ENTERED) {
+                return Optional.of("Applicant has already entered breathing space");
+            } else if (caseData.getBreathingSpace().getState() == BreathingSpaceState.LIFTED) {
+                // TODO check if user can enter BS multiple times
+                return Optional.of("Can't enter breathing space twice");
+            } else {
+                log.error(caseData.getCcdCaseReference()
+                              + " Breathing Space Status unknown, prevents entering Breathing Space");
+                return Optional.of("Can't enter breathing space");
+            }
+        } else {
+            return Optional.empty();
+        }
     }
 
     CallbackResponse submitted(CallbackParams params) {
