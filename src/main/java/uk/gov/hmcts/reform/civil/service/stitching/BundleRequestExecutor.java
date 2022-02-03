@@ -74,8 +74,9 @@ public class BundleRequestExecutor {
                     );
             if (response1.getStatusCode().equals(HttpStatus.OK)) {
                 caseData = caseDetailsConverter.toCaseData(response1.getBody());
+            } else if (log.isDebugEnabled()) {
+                log.debug("KO bundle request with status " + response1.getStatusCode());
             }
-
         } catch (RestClientResponseException e) {
             log.debug(e.getMessage(), e);
         }

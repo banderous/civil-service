@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.civil.service.stitching;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.civil.config.StitchingConfiguration;
@@ -25,6 +26,7 @@ import static uk.gov.hmcts.reform.civil.service.documentmanagement.UnsecuredDocu
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CivilDocumentStitchingService implements DocumentStitcher {
 
     private final BundleRequestExecutor bundleRequestExecutor;
@@ -74,6 +76,8 @@ public class CivilDocumentStitchingService implements DocumentStitcher {
                     .createdDatetime(LocalDateTime.now())
                     .createdBy(CREATED_BY)
                     .build();
+            } else {
+                log.debug("Bundle request answered, but had not a stitched document");
             }
         }
         return caseDocument;
