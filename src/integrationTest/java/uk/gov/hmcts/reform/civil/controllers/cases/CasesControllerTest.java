@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.civil.controllers.cases;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -7,6 +9,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.civil.controllers.BaseIntegrationTest;
 import uk.gov.hmcts.reform.civil.helpers.CaseDetailsConverter;
 import uk.gov.hmcts.reform.civil.model.CaseData;
+import uk.gov.hmcts.reform.civil.model.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.civil.service.CoreCaseDataService;
 import uk.gov.hmcts.reform.civil.service.RoleAssignmentsService;
 
@@ -53,7 +56,11 @@ public class CasesControllerTest extends BaseIntegrationTest {
     @Test
     @SneakyThrows
     public void shouldReturnRASAssignment() {
-        when(roleAssignmentsService.getRoleAssignments(ACTOR_ID)).thenReturn(ACTOR_ROLE);
+        ObjectMapper mapper = JsonMapper.builder()
+            .findAndAddModules().build();
+        when(roleAssignmentsService.getRoleAssignmentList(ACTOR_ID)).thenReturn(mapper.readValue(ACTOR_ROLE,
+                                                                                                 RoleAssignmentResponse.class
+        ).getRoleAssignmentResponse());
         doGet(BEARER_TOKEN, CASES_ACTOR_URL, ACTOR_ID)
             .andExpect(status().isOk());
     }

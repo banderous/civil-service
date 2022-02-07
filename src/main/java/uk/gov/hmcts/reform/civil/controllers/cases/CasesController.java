@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.civil.controllers.cases;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.AllArgsConstructor;
@@ -13,9 +14,12 @@ import org.springframework.web.bind.annotation.*;
 import uk.gov.hmcts.reform.civil.helpers.CaseDetailsConverter;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 import uk.gov.hmcts.reform.civil.model.CaseData;
+import uk.gov.hmcts.reform.civil.model.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.civil.model.search.Query;
 import uk.gov.hmcts.reform.civil.service.CoreCaseDataService;
 import uk.gov.hmcts.reform.civil.service.RoleAssignmentsService;
+
+import java.util.List;
 
 import static java.util.Collections.emptyList;
 @Api
@@ -68,11 +72,11 @@ public class CasesController {
 
     @GetMapping(path = "/actors/{actorId}")
     @ApiOperation("Gets credentials for actorId from RAS")
-    public String getCredentials(@PathVariable("actorId") String actorId,
-                                 @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
-                                 @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization) {
+    public List<RoleAssignmentResponse.RoleAssignment> getRoleAssignments(@PathVariable("actorId") String actorId,
+                                                                      @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization,
+                                                                      @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization) throws JsonProcessingException {
         log.info( "Received ActorId: {}",actorId);
-        String response = roleAssignmentsService.getRoleAssignments(actorId);
+        List<RoleAssignmentResponse.RoleAssignment> response = roleAssignmentsService.getRoleAssignmentList(actorId);
         log.info("ActorId: {}", response);
         return response;
     }
