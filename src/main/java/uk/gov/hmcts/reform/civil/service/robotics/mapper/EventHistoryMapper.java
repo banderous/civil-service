@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.civil.stateflow.model.State;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -151,8 +152,11 @@ public class EventHistoryMapper {
                         break;
                 }
             });
+
         buildRespondent1LitigationFriendEvent(builder, caseData);
+        buildRespondent2LitigationFriendEvent(builder, caseData);
         buildCaseNotesEvents(builder, caseData);
+
         return eventHistorySequencer.sortEvents(builder.build());
     }
 
@@ -178,12 +182,31 @@ public class EventHistoryMapper {
     private void buildRespondent1LitigationFriendEvent(EventHistory.EventHistoryBuilder builder, CaseData caseData) {
         if (featureToggleService.isRpaContinuousFeedEnabled()
             && caseData.getRespondent1LitigationFriendCreatedDate() != null) {
-            String miscText = "Litigation friend added for respondent.";
+
+            String miscText = "Litigation friend added for respondent: " + caseData.getRespondent1().getPartyName();
             builder.miscellaneous(
                 Event.builder()
                     .eventSequence(prepareEventSequence(builder.build()))
                     .eventCode(MISCELLANEOUS.getCode())
                     .dateReceived(caseData.getRespondent1LitigationFriendCreatedDate())
+                    .eventDetailsText(miscText)
+                    .eventDetails(EventDetails.builder()
+                                      .miscText(miscText)
+                                      .build())
+                    .build());
+        }
+    }
+
+    private void buildRespondent2LitigationFriendEvent(EventHistory.EventHistoryBuilder builder, CaseData caseData) {
+        if (featureToggleService.isRpaContinuousFeedEnabled()
+            && caseData.getRespondent2LitigationFriendCreatedDate() != null) {
+
+            String miscText = "Litigation friend added for respondent: " + caseData.getRespondent2().getPartyName();
+            builder.miscellaneous(
+                Event.builder()
+                    .eventSequence(prepareEventSequence(builder.build()))
+                    .eventCode(MISCELLANEOUS.getCode())
+                    .dateReceived(caseData.getRespondent2LitigationFriendCreatedDate())
                     .eventDetailsText(miscText)
                     .eventDetails(EventDetails.builder()
                                       .miscText(miscText)
@@ -695,7 +718,6 @@ public class EventHistoryMapper {
                 } else {
                     extensionDate = caseData.getRespondentSolicitor1AgreedDeadlineExtension();
                     dateReceived  = caseData.getRespondent1TimeExtensionDate();
-
                 }
             }
         }
@@ -707,12 +729,16 @@ public class EventHistoryMapper {
                     .eventCode(CONSENT_EXTENSION_FILING_DEFENCE.getCode())
                     .dateReceived(dateReceived)
                     .litigiousPartyID("002")
-                    .eventDetailsText(format("agreedExtensionDate: %s", extensionDate
-                        .format(ISO_DATE)))
-                    .eventDetails(EventDetails.builder()
-                                      .agreedExtensionDate(extensionDate
-                                                               .format(ISO_DATE))
-                                      .build())
+                    .eventDetailsText(
+                        //format("agreed extension date: %s", extensionDate.format(ISO_DATE)))
+                        format("agreed extension date: %s",
+                               extensionDate.format(DateTimeFormatter.ofPattern("dd MM yyyy")))
+                    )
+                    .eventDetails(
+                        EventDetails.builder()
+                            .agreedExtensionDate(extensionDate.format(ISO_DATE))
+                            .build()
+                    )
                     .build()
             )
         );
