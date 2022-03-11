@@ -86,6 +86,6 @@ public class GeneralApplication implements MappableObject {
         this.claimant1PartyName = claimant1PartyName;
         this.claimant2PartyName = claimant2PartyName;
         this.defendant1PartyName = defendant1PartyName;
-        this.defendant2PartyName = claimant2PartyName;
+        this.defendant2PartyName = defendant2PartyName;
     }
 }
