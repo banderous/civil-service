@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.civil.assertion;
 
 import uk.gov.hmcts.reform.ccd.model.Organisation;
 import uk.gov.hmcts.reform.ccd.model.OrganisationPolicy;
-import uk.gov.hmcts.reform.civil.enums.MultiPartyScenario;
 import uk.gov.hmcts.reform.civil.model.CaseData;
 import uk.gov.hmcts.reform.civil.model.Fee;
 import uk.gov.hmcts.reform.civil.model.LitigationFriend;
@@ -11,11 +10,10 @@ import uk.gov.hmcts.reform.civil.model.SolicitorOrganisationDetails;
 import uk.gov.hmcts.reform.civil.model.robotics.CaseHeader;
 import uk.gov.hmcts.reform.civil.model.robotics.ClaimDetails;
 import uk.gov.hmcts.reform.civil.model.robotics.LitigiousParty;
-import uk.gov.hmcts.reform.civil.model.robotics.RoboticsCaseData;
+import uk.gov.hmcts.reform.civil.model.robotics.RoboticsCaseDataSpec;
 import uk.gov.hmcts.reform.civil.model.robotics.Solicitor;
 import uk.gov.hmcts.reform.civil.utils.PartyUtils;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static java.time.format.DateTimeFormatter.ISO_DATE;
@@ -26,13 +24,13 @@ import static uk.gov.hmcts.reform.civil.assertion.CustomAssertions.assertThat;
 import static uk.gov.hmcts.reform.civil.service.robotics.mapper.RoboticsDataMapper.APPLICANT_SOLICITOR_ID;
 import static uk.gov.hmcts.reform.civil.service.robotics.mapper.RoboticsDataMapper.RESPONDENT_SOLICITOR_ID;
 
-public class RoboticsCaseDataAssert extends CustomAssert<RoboticsCaseDataAssert, RoboticsCaseData> {
+public class RoboticsCaseDataSpecAssert extends CustomAssert<RoboticsCaseDataSpecAssert, RoboticsCaseDataSpec> {
 
-    public RoboticsCaseDataAssert(RoboticsCaseData actual) {
-        super("RoboticsCaseData", actual, RoboticsCaseDataAssert.class);
+    public RoboticsCaseDataSpecAssert(RoboticsCaseDataSpec actual) {
+        super("RoboticsCaseData", actual, RoboticsCaseDataSpecAssert.class);
     }
 
-    public RoboticsCaseDataAssert isEqualTo(CaseData expected) {
+    public RoboticsCaseDataSpecAssert isEqualTo(CaseData expected) {
         isNotNull();
 
         CaseHeader header = actual.getHeader();
@@ -45,37 +43,15 @@ public class RoboticsCaseDataAssert extends CustomAssert<RoboticsCaseDataAssert,
             "Claimant",
             actual.getLitigiousParties().get(0),
             expected.getApplicant1(),
-            expected.getApplicant1LitigationFriend(),
-            expected.getClaimDetailsNotificationDate()
+            expected.getApplicant1LitigationFriend()
         );
         assertParty(
             "respondent1",
             "Defendant",
             actual.getLitigiousParties().get(1),
             expected.getRespondent1(),
-            expected.getRespondent1LitigationFriend(),
-            expected.getClaimDetailsNotificationDate()
+            expected.getRespondent1LitigationFriend()
         );
-        if (MultiPartyScenario.ONE_V_TWO_TWO_LEGAL_REP == MultiPartyScenario.getMultiPartyScenario(expected)
-            || MultiPartyScenario.ONE_V_TWO_TWO_LEGAL_REP == MultiPartyScenario.getMultiPartyScenario(expected)) {
-            assertParty(
-                "respondent1",
-                "Defendant",
-                actual.getLitigiousParties().get(2),
-                expected.getRespondent2(),
-                expected.getRespondent2LitigationFriend(),
-                expected.getClaimDetailsNotificationDate()
-            );
-        } else if (MultiPartyScenario.TWO_V_ONE == MultiPartyScenario.getMultiPartyScenario(expected)) {
-            assertParty(
-                "applicant1",
-                "Claimant",
-                actual.getLitigiousParties().get(2),
-                expected.getApplicant2(),
-                expected.getApplicant2LitigationFriend(),
-                expected.getClaimDetailsNotificationDate()
-            );
-        }
 
         assertSolicitor(
             APPLICANT_SOLICITOR_ID,
@@ -109,22 +85,22 @@ public class RoboticsCaseDataAssert extends CustomAssert<RoboticsCaseDataAssert,
         );
         compare(
             "caseType",
-            "PERSONAL INJURY",
+            "SPECIFIED CLAIM",
             ofNullable(header.getCaseType())
         );
         compare(
             "owningCourtCode",
-            "390",
+            "",
             ofNullable(header.getOwningCourtCode())
         );
         compare(
             "owningCourtName",
-            "CCMCC",
+            "",
             ofNullable(header.getOwningCourtName())
         );
         compare(
             "preferredCourtCode",
-            expected.getCourtLocation().getApplicantPreferredCourt(),
+            "",
             ofNullable(header.getPreferredCourtCode())
         );
     }
@@ -146,7 +122,7 @@ public class RoboticsCaseDataAssert extends CustomAssert<RoboticsCaseDataAssert,
 
         compare(
             "amountClaimed",
-            expected.getClaimValue().toPounds(),
+            expected.getTotalClaimAmount(),
             ofNullable(actual.getAmountClaimed())
         );
 
@@ -223,8 +199,7 @@ public class RoboticsCaseDataAssert extends CustomAssert<RoboticsCaseDataAssert,
                              String litigiousPartyType,
                              LitigiousParty litigiousParty,
                              Party party,
-                             LitigationFriend litigationFriend,
-                             LocalDateTime claimDetailsNotificationDate
+                             LitigationFriend litigationFriend
     ) {
         if (party == null && litigiousParty != null) {
             failExpectedPresent(fieldName, litigiousParty);
@@ -251,13 +226,6 @@ public class RoboticsCaseDataAssert extends CustomAssert<RoboticsCaseDataAssert,
                 "dateOfBirth",
                 litigiousParty.getDateOfBirth(),
                 PartyUtils.getDateOfBirth(party).map(d -> d.format(ISO_DATE))
-            );
-            compare(
-                "dateOfService",
-                litigiousParty.getDateOfService(),
-                ofNullable(claimDetailsNotificationDate)
-                    .map(LocalDateTime::toLocalDate)
-                    .map(d -> d.format(ISO_DATE))
             );
 
             assertThat(litigiousParty.getAddresses().getContactAddress())
