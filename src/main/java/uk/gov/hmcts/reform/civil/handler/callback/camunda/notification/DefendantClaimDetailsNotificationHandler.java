@@ -44,6 +44,13 @@ public class DefendantClaimDetailsNotificationHandler extends CallbackHandler im
 
     private static final String REFERENCE_TEMPLATE = "claim-details-respondent-notification-%s";
 
+    private static final CaseEventToCamundaActivityIdMapper CASE_EVENT_TO_CAMUNDA_ACTIVITY_ID_MAPPER
+        = new CaseEventToCamundaActivityIdMapper(Map.of(
+        NOTIFY_RESPONDENT_SOLICITOR1_FOR_CLAIM_DETAILS, TASK_ID_EMAIL_FIRST_SOL,
+        NOTIFY_RESPONDENT_SOLICITOR1_FOR_CLAIM_DETAILS_CC, TASK_ID_EMAIL_APP_SOL_CC,
+        NOTIFY_RESPONDENT_SOLICITOR2_FOR_CLAIM_DETAILS, TASK_ID_EMAIL_SECOND_SOL
+    ));
+
     private final NotificationService notificationService;
     private final NotificationsProperties notificationsProperties;
     private final ObjectMapper objectMapper;
@@ -57,17 +64,7 @@ public class DefendantClaimDetailsNotificationHandler extends CallbackHandler im
 
     @Override
     public String camundaActivityId(CallbackParams callbackParams) {
-        CaseEvent caseEvent = CaseEvent.valueOf(callbackParams.getRequest().getEventId());
-        switch (caseEvent) {
-            case NOTIFY_RESPONDENT_SOLICITOR1_FOR_CLAIM_DETAILS:
-                return TASK_ID_EMAIL_FIRST_SOL;
-            case NOTIFY_RESPONDENT_SOLICITOR1_FOR_CLAIM_DETAILS_CC:
-                return TASK_ID_EMAIL_APP_SOL_CC;
-            case NOTIFY_RESPONDENT_SOLICITOR2_FOR_CLAIM_DETAILS:
-                return TASK_ID_EMAIL_SECOND_SOL;
-            default:
-                throw new CallbackException(String.format("Callback handler received illegal event: %s", caseEvent));
-        }
+        return CASE_EVENT_TO_CAMUNDA_ACTIVITY_ID_MAPPER.camundaActivityId(callbackParams);
     }
 
     @Override
