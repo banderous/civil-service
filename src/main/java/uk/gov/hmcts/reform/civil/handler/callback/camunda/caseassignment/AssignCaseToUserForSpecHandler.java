@@ -1,18 +1,13 @@
 package uk.gov.hmcts.reform.civil.handler.callback.camunda.caseassignment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.civil.callback.Callback;
-import uk.gov.hmcts.reform.civil.callback.CallbackHandler;
 import uk.gov.hmcts.reform.civil.callback.CallbackParams;
 import uk.gov.hmcts.reform.civil.callback.CaseEvent;
 import uk.gov.hmcts.reform.civil.enums.CaseRole;
 import uk.gov.hmcts.reform.civil.helpers.CaseDetailsConverter;
-import uk.gov.hmcts.reform.civil.model.CaseData;
-import uk.gov.hmcts.reform.civil.model.IdamUserDetails;
 import uk.gov.hmcts.reform.civil.service.CoreCaseUserService;
 
 import java.util.List;
@@ -22,15 +17,16 @@ import static uk.gov.hmcts.reform.civil.callback.CallbackType.ABOUT_TO_SUBMIT;
 import static uk.gov.hmcts.reform.civil.callback.CaseEvent.ASSIGN_CASE_TO_APPLICANT_SOLICITOR1_SPEC;
 
 @Service
-@RequiredArgsConstructor
-public class AssignCaseToUserForSpecHandler extends CallbackHandler {
+public class AssignCaseToUserForSpecHandler extends AbstractAssignCaseToUserHandler {
 
     private static final List<CaseEvent> EVENTS = List.of(ASSIGN_CASE_TO_APPLICANT_SOLICITOR1_SPEC);
     public static final String TASK_ID = "CaseAssignmentToApplicantSolicitor1ForSpec";
 
-    private final CoreCaseUserService coreCaseUserService;
-    private final CaseDetailsConverter caseDetailsConverter;
-    private final ObjectMapper objectMapper;
+    public AssignCaseToUserForSpecHandler(CoreCaseUserService coreCaseUserService,
+                                          CaseDetailsConverter caseDetailsConverter,
+                                          ObjectMapper objectMapper) {
+        super(coreCaseUserService, caseDetailsConverter, objectMapper);
+    }
 
     @Override
     protected Map<String, Callback> callbacks() {
@@ -50,21 +46,6 @@ public class AssignCaseToUserForSpecHandler extends CallbackHandler {
     }
 
     private CallbackResponse assignSolicitorCaseRole(CallbackParams callbackParams) {
-        CaseData caseData = caseDetailsConverter.toCaseData(callbackParams.getRequest().getCaseDetails());
-        String caseId = caseData.getCcdCaseReference().toString();
-        IdamUserDetails userDetails = caseData.getApplicantSolicitor1UserDetails();
-        String submitterId = userDetails.getId();
-        String organisationId = caseData.getApplicant1OrganisationPolicy().getOrganisation().getOrganisationID();
-
-        coreCaseUserService.assignCase(caseId, submitterId, organisationId, CaseRole.APPLICANTSOLICITORONESPEC);
-        coreCaseUserService.removeCreatorRoleCaseAssignment(caseId, submitterId, organisationId);
-
-        CaseData updated = caseData.toBuilder()
-            .applicantSolicitor1UserDetails(IdamUserDetails.builder().email(userDetails.getEmail()).build())
-            .build();
-
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(updated.toMap(objectMapper))
-            .build();
+        return assignSolicitorCaseRole(callbackParams, CaseRole.APPLICANTSOLICITORONESPEC);
     }
 }
