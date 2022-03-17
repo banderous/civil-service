@@ -390,14 +390,26 @@ public class FlowPredicate {
             && caseData.getRespondent2TimeExtensionDate() == null
             && caseData.getRespondent2ClaimResponseIntentionType() == null;
 
-    public static final Predicate<CaseData> caseDismissedAfterDetailNotifiedExtension = caseData ->
-        caseData.getClaimDismissedDeadline().isBefore(LocalDateTime.now())
-            && ((caseData.getRespondent1AcknowledgeNotificationDate() == null
-                && caseData.getRespondent1TimeExtensionDate() != null)
-                    || (caseData.getRespondent2AcknowledgeNotificationDate() == null
-                        && caseData.getRespondent2TimeExtensionDate() != null))
-            && caseData.getRespondent1ClaimResponseIntentionType() == null
-            && caseData.getRespondent2ClaimResponseIntentionType() == null;
+    public static final Predicate<CaseData> caseDismissedAfterDetailNotifiedExtension = caseData -> {
+        switch (getMultiPartyScenario(caseData)) {
+            case ONE_V_TWO_TWO_LEGAL_REP:
+                return caseData.getClaimDismissedDeadline().isBefore(LocalDateTime.now())
+                    && caseData.getRespondent1AcknowledgeNotificationDate() == null
+                    && caseData.getRespondent1TimeExtensionDate() != null
+                    && caseData.getRespondent2AcknowledgeNotificationDate() == null
+                    && caseData.getRespondent2TimeExtensionDate() != null
+                    && caseData.getRespondent1ClaimResponseIntentionType() == null
+                    && caseData.getRespondent2ClaimResponseIntentionType() == null;
+
+            default:
+                return caseData.getClaimDismissedDeadline().isBefore(LocalDateTime.now())
+                    && caseData.getRespondent1AcknowledgeNotificationDate() == null
+                    && caseData.getRespondent1TimeExtensionDate() != null
+                    && caseData.getRespondent1ClaimResponseIntentionType() == null
+                    && caseData.getRespondent2ClaimResponseIntentionType() == null;
+        }
+    };
+
 
     public static final Predicate<CaseData> caseDismissedAfterClaimAcknowledged = caseData -> {
         switch (getMultiPartyScenario(caseData)) {
@@ -421,8 +433,8 @@ public class FlowPredicate {
                 return caseData.getClaimDismissedDeadline().isBefore(LocalDateTime.now())
                     && caseData.getRespondent1AcknowledgeNotificationDate() != null
                     && caseData.getRespondent2AcknowledgeNotificationDate() != null
-                    && (caseData.getRespondent1TimeExtensionDate() != null
-                        || caseData.getRespondent2TimeExtensionDate() != null);
+                    && caseData.getRespondent1TimeExtensionDate() != null
+                    && caseData.getRespondent2TimeExtensionDate() != null;
             default:
                 return caseData.getClaimDismissedDeadline().isBefore(LocalDateTime.now())
                     && caseData.getRespondent1TimeExtensionDate() != null

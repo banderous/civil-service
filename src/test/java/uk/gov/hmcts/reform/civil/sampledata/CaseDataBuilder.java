@@ -1316,7 +1316,18 @@ public class CaseDataBuilder {
     }
 
     public CaseDataBuilder atStateClaimDetailsNotifiedTimeExtension_Defendent2() {
-        atStateClaimDetailsNotified();
+        atStateClaimDetailsNotified_1v2_andNotifyBothSolicitors();
+        respondent2ResponseDeadline = RESPONSE_DEADLINE;
+        respondent2TimeExtensionDate = claimDetailsNotificationDate.plusDays(1);
+        respondentSolicitor2AgreedDeadlineExtension = LocalDate.now();
+        return this;
+    }
+
+    public CaseDataBuilder atStateClaimDetailsNotifiedTimeExtension_BothDefendants() {
+        atStateClaimDetailsNotified_1v2_andNotifyBothSolicitors();
+        respondent1ResponseDeadline = RESPONSE_DEADLINE;
+        respondent1TimeExtensionDate = claimDetailsNotificationDate.plusDays(1);
+        respondentSolicitor1AgreedDeadlineExtension = LocalDate.now();
         respondent2ResponseDeadline = RESPONSE_DEADLINE;
         respondent2TimeExtensionDate = claimDetailsNotificationDate.plusDays(1);
         respondentSolicitor2AgreedDeadlineExtension = LocalDate.now();

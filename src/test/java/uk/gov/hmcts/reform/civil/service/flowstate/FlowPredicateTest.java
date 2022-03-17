@@ -1168,7 +1168,7 @@ class FlowPredicateTest {
         }
 
         @Test
-        void shouldReturnTrue_whenCaseDataAtStateClaimDismissedAfterClaimNotifiedExtension() {
+        void shouldReturnTrue_whenCaseDataAtStateClaimDismissedAfterClaimNotifiedExtension_1v1() {
             CaseData caseData = CaseDataBuilder.builder().atStateClaimDetailsNotifiedTimeExtension()
                 .claimDismissedDeadline(LocalDateTime.now().minusDays(5))
                 .build();
@@ -1176,9 +1176,18 @@ class FlowPredicateTest {
         }
 
         @Test
-        void shouldReturnTrue_whenCaseDataAtStateClaimDismissedAfterClaimNotifiedExtensionAndDef2Response() {
+        void shouldReturnFalse_whenCaseDataAtStateClaimDismissedAfterClaimNotifiedExtension_1v2_Def2Extension() {
             CaseData caseData = CaseDataBuilder.builder()
                 .atStateClaimDetailsNotifiedTimeExtension_Defendent2()
+                .claimDismissedDeadline(LocalDateTime.now().minusDays(5))
+                .build();
+            assertFalse(caseDismissedAfterDetailNotifiedExtension.test(caseData));
+        }
+
+        @Test
+        void shouldReturnTrue_whenCaseDataAtStateClaimDismissedAfterClaimNotifiedExtension_1v2_BothDefExtension() {
+            CaseData caseData = CaseDataBuilder.builder()
+                .atStateClaimDetailsNotifiedTimeExtension_BothDefendants()
                 .claimDismissedDeadline(LocalDateTime.now().minusDays(5))
                 .build();
             assertTrue(caseDismissedAfterDetailNotifiedExtension.test(caseData));
